@@ -25,19 +25,19 @@ alpha = args.alpha  # Hyper Parameter
 """
 Functions for logistic regression for vectorized version
 """
-def cross_entropy_loss_v(y_hat, y):
+def cross_entropy_loss(y_hat, y):
     a1 = -(y * np.log(y_hat))
     a2 = (1 - y) * np.log(1 - y_hat + 1e-10)
     return a1 + a2
 
-def sigmoid_v(z):
+def sigmoid(z):
     return 1 / (1 + np.exp(-z + 1e-10))
 
-def model_v(x, W, b):
-    return sigmoid_v(np.dot(W, x) + b)
+def model(x, W, b):
+    return sigmoid(np.dot(W, x) + b)
 
 
-def train_vectorized(x_train, y_train, x_test, y_test):
+def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
     W = np.random.rand(2)
@@ -53,8 +53,8 @@ def train_vectorized(x_train, y_train, x_test, y_test):
     print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0], W[1], b))
     print("\n######### Training #########")
     for iteration in range(iterations):
-        y_hat = model_v(x_train, W, b)
-        cost = np.sum((-cross_entropy_loss_v(y_hat, y_train))) / m
+        y_hat = model(x_train, W, b)
+        cost = np.sum((-cross_entropy_loss(y_hat, y_train))) / m
 
         dz = y_hat - y_train
         dW = np.dot(x_train, dz) / m
@@ -78,8 +78,8 @@ def train_vectorized(x_train, y_train, x_test, y_test):
 
     start_time = time.time()
     print("\n######### Inference #########")
-    y_hat = model_v(x_test, W, b)
-    cost = np.sum((-cross_entropy_loss_v(y_hat, y_test))) / n
+    y_hat = model(x_test, W, b)
+    cost = np.sum((-cross_entropy_loss(y_hat, y_test))) / n
 
     y_hat[y_hat > 0.5] = 1
     y_hat[y_hat <= 0.5] = 0
@@ -113,13 +113,13 @@ if __name__ == "__main__":
     x_test = test_set['x_test']
     y_test = test_set['y_test']   
 
-    T_train, T_test, acc_train, acc_test = train_vectorized(x_train, y_train, x_test, y_test)
+    T_train, T_test, acc_train, acc_test = train_n_test(x_train, y_train, x_test, y_test)
     print("\n\n")
-    print("######## PARAMETERS ########")
+    print("######## HYPER-PARAMETERS ########")
     print("num of train sample (m) : %d" % (m))
     print("num of test sample (n) : %d" % (n))
     print("num of iterations (k) : %d" % (iterations))
-    print("\n######## RESULT ########")
+    print("\n######## TASK 1 RESULT ########")
     print("Training Time : %.6f" % (T_train))
     print("Training Accuracy : %.6f" % (acc_train))
     print("Test Time : %.6f" % (T_test))
