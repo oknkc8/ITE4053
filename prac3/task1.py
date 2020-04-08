@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import time
 import os
+import pdb
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--size_m', type=int, default=1000, help='number of train samples')
@@ -26,67 +27,77 @@ alpha = args.alpha  # Hyper Parameter
 Functions for logistic regression for vectorized version
 """
 def cross_entropy_loss(y_hat, y):
-    a1 = -(y * np.log(y_hat))
-    a2 = (1 - y) * np.log(1 - y_hat + 1e-10)
+    a1 = (y * np.log(y_hat))
+    a2 = (1 - y) * np.log(1 - y_hat)
     return a1 + a2
 
 def sigmoid(z):
-    return 1 / (1 + np.exp(-z + 1e-10))
+    return 1 / (1 + np.exp(-z))
 
 def model(x, W, b):
-    return sigmoid(np.dot(W, x) + b)
+    return np.dot(W, x) + b
 
 
 def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
-    W = np.random.rand(2)
-    b = random.random()
+    W = np.random.rand(1,2)
+    b = np.random.rand(1,1)
     if args.initial_zero :
-        W = np.zeros(2)
-        b = 0
+        W = np.zeros((1,2))
+        b = np.zeros((1,1))
 
     acc_train = 0
     acc_test = 0
 
     start_time = time.time()
-    print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0], W[1], b))
+    print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
     print("\n######### Training #########")
     for iteration in range(iterations):
-        y_hat = model(x_train, W, b)
-        cost = np.sum((-cross_entropy_loss(y_hat, y_train))) / m
+        
+        # Foward Propagation
+        Z = model(x_train, W, b)
+        A = sigmoid(Z)
+        cost = np.sum((-cross_entropy_loss(A, y_train))) / m
 
-        dz = y_hat - y_train
-        dW = np.dot(x_train, dz) / m
-        db = np.sum(dz) / m
+        # Backward Propagation
+        dZ = A - y_train
+        dW = np.dot(dZ, x_train.T) / m
+        db = np.sum(dZ, axis=1, keepdims=True) / m
 
+        # Calculate Accuracy
+        y_hat = A
         y_hat[y_hat > 0.5] = 1
         y_hat[y_hat <= 0.5] = 0
         acc = np.sum(y_hat == y_train)
 
-        # Step 2-4
         if (iteration + 1) % log_step == 0:
             print("%d iteration => Cost: %f, Training Accuracy: %f%%" % (iteration + 1, cost, acc / m * 100.0))
         acc_train = (acc / m * 100.0)
 
+
+        print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
+        print(dW, db)
         # Parameters Update
         W = W - alpha * dW
         b = b - alpha * db
+        print("Initial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
     
     end_time = time.time()
     train_time = (end_time - start_time) / iterations
 
     start_time = time.time()
     print("\n######### Inference #########")
-    y_hat = model(x_test, W, b)
-    cost = np.sum((-cross_entropy_loss(y_hat, y_test))) / n
+    Z = model(x_test, W, b)
+    A = sigmoid(Z)
+    cost = np.sum((-cross_entropy_loss(A, y_test))) / n
 
+    y_hat = A
     y_hat[y_hat > 0.5] = 1
     y_hat[y_hat <= 0.5] = 0
     acc = np.sum(y_hat == y_test)
 
-    if (iteration + 1) % log_step == 0:
-        print("Cost: %f, Test Accuracy: %f%%" % (cost, acc / n * 100.0))
+    print("Cost: %f, Test Accuracy: %f%%" % (cost, acc / n * 100.0))
     acc_test = acc / n * 100.0
     
     end_time = time.time()
