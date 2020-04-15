@@ -16,8 +16,8 @@ def generate(m, n):
     x2_train = []
     y_train = []
     for i in range(m):
-        x1_train.append(random.randint(-2,2))
-        x2_train.append(random.randint(-2,2))
+        x1_train.append(random.uniform(-2,2))
+        x2_train.append(random.uniform(-2,2))
 
         if x1_train[-1] * x1_train[-1] > x2_train[-1]:
             y_train.append(1)
@@ -38,8 +38,8 @@ def generate(m, n):
     x2_test = []
     y_test = []
     for i in range(n):
-        x1_test.append(random.randint(-2,2))
-        x2_test.append(random.randint(-2,2))
+        x1_test.append(random.uniform(-2,2))
+        x2_test.append(random.uniform(-2,2))
 
         if x1_test[-1] * x1_test[-1] > x2_test[-1]:
             y_test.append(1)
