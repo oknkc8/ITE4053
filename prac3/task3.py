@@ -27,8 +27,9 @@ alpha = args.alpha  # Hyper Parameter
 Functions for logistic regression for vectorized version
 """
 def cross_entropy_loss(y_hat, y):
+    #pdb.set_trace()
     a1 = (y * np.log(y_hat))
-    a2 = (1 - y) * np.log(1 - y_hat)
+    a2 = (1 - y) * np.log(1 - y_hat + 1e-10)
     return a1 + a2
 
 def sigmoid(z):
@@ -41,10 +42,10 @@ def model(x, W, b):
 def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
-    W1 = np.random.rand(3,2)
-    b1 = np.random.rand(3,1)
-    W2 = np.random.rand(1,3)
-    b2 = np.random.rand(1,1)
+    W1 = np.random.randn(3,2)
+    b1 = np.random.randn(3,1)
+    W2 = np.random.randn(1,3)
+    b2 = np.random.randn(1,1)
 
     if args.initial_zero :
         W1 = np.zeros((3,2))
@@ -56,6 +57,7 @@ def train_n_test(x_train, y_train, x_test, y_test):
     acc_test = 0
 
     start_time = time.time()
+    print("\n\nInitial Function Parameters: ", W1, b1, W2, b2)
     print("\n######### Training #########")
     for iteration in range(iterations):
         # Foward Propagation

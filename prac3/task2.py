@@ -41,10 +41,10 @@ def model(x, W, b):
 def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
-    W1 = np.random.rand(1,2)
-    b1 = np.random.rand(1,1)
-    W2 = np.random.rand(1,1)
-    b2 = np.random.rand(1,1)
+    W1 = np.random.randn(1,2)
+    b1 = np.random.randn(1,1)
+    W2 = np.random.randn(1,1)
+    b2 = np.random.randn(1,1)
 
     if args.initial_zero :
         W1 = np.zeros((1,2))
@@ -56,6 +56,7 @@ def train_n_test(x_train, y_train, x_test, y_test):
     acc_test = 0
 
     start_time = time.time()
+    print("\n\nInitial Function Parameters: ", W1, b1, W2, b2)
     print("\n######### Training #########")
     for iteration in range(iterations):
         # Foward Propagation

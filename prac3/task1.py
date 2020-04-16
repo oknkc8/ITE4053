@@ -41,8 +41,8 @@ def model(x, W, b):
 def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
-    W = np.random.rand(1,2)
-    b = np.random.rand(1,1)
+    W = np.random.randn(1,2)
+    b = np.random.randn(1,1)
     if args.initial_zero :
         W = np.zeros((1,2))
         b = np.zeros((1,1))
@@ -51,7 +51,7 @@ def train_n_test(x_train, y_train, x_test, y_test):
     acc_test = 0
 
     start_time = time.time()
-    print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
+    print("\n\nInitial Function Parameters: ", W, b)
     print("\n######### Training #########")
     for iteration in range(iterations):
         
@@ -75,13 +75,9 @@ def train_n_test(x_train, y_train, x_test, y_test):
             print("%d iteration => Cost: %f, Training Accuracy: %f%%" % (iteration + 1, cost, acc / m * 100.0))
         acc_train = (acc / m * 100.0)
 
-
-        print("\n\nInitial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
-        print(dW, db)
         # Parameters Update
         W = W - alpha * dW
         b = b - alpha * db
-        print("Initial Function Parameters w1: %.6f, w2: %.6f, b: %.6f"%(W[0][0], W[0][1], b[0][0]))
     
     end_time = time.time()
     train_time = (end_time - start_time) / iterations
