@@ -13,6 +13,7 @@ parser.add_argument('--size_k', type=int, default=100, help='number of iteration
 parser.add_argument('--log_step', type=int, default=1, help='step for printing log')
 parser.add_argument('--alpha', type=float, default=0.001, help='learning rate')
 parser.add_argument('-initial_zero', action="store_true", help='set initial parameter as zero')
+parser.add_argument('-find_best_alpha', action="store_true", help='find alpha for best performance')
 
 args = parser.parse_args()
 
@@ -21,14 +22,17 @@ n = args.size_n  # num of evaluation sample
 iterations = args.size_k
 log_step = args.log_step
 alpha = args.alpha  # Hyper Parameter
+flag_print = True
 
+W_initial = np.random.randn(1,2)
+b_initial = np.random.randn(1,1)
 
 """
 Functions for logistic regression for vectorized version
 """
 def cross_entropy_loss(y_hat, y):
     a1 = (y * np.log(y_hat))
-    a2 = (1 - y) * np.log(1 - y_hat)
+    a2 = (1 - y) * np.log(1 - y_hat + 1e-10)
     return a1 + a2
 
 def sigmoid(z):
@@ -41,18 +45,21 @@ def model(x, W, b):
 def train_n_test(x_train, y_train, x_test, y_test):
 
     # Initialize Fucntion Parameters
-    W = np.random.randn(1,2)
-    b = np.random.randn(1,1)
+    W = W_initial
+    b = b_initial
     if args.initial_zero :
         W = np.zeros((1,2))
         b = np.zeros((1,1))
 
     acc_train = 0
     acc_test = 0
+    cost_train = 0
+    cost_test = 0
 
     start_time = time.time()
-    print("\n\nInitial Function Parameters: ", W, b)
-    print("\n######### Training #########")
+    if flag_print:
+        print("\n\nInitial Function Parameters: ", W, b)
+        print("\n######### Training #########")
     for iteration in range(iterations):
         
         # Foward Propagation
@@ -71,9 +78,10 @@ def train_n_test(x_train, y_train, x_test, y_test):
         y_hat[y_hat <= 0.5] = 0
         acc = np.sum(y_hat == y_train)
 
-        if (iteration + 1) % log_step == 0:
+        if (iteration + 1) % log_step == 0 and flag_print:
             print("%d iteration => Cost: %f, Training Accuracy: %f%%" % (iteration + 1, cost, acc / m * 100.0))
         acc_train = (acc / m * 100.0)
+        cost_train = cost
 
         # Parameters Update
         W = W - alpha * dW
@@ -83,7 +91,8 @@ def train_n_test(x_train, y_train, x_test, y_test):
     train_time = (end_time - start_time) / iterations
 
     start_time = time.time()
-    print("\n######### Inference #########")
+    if flag_print:
+        print("\n######### Inference #########")
     Z = model(x_test, W, b)
     A = sigmoid(Z)
     cost = np.sum((-cross_entropy_loss(A, y_test))) / n
@@ -93,13 +102,15 @@ def train_n_test(x_train, y_train, x_test, y_test):
     y_hat[y_hat <= 0.5] = 0
     acc = np.sum(y_hat == y_test)
 
-    print("Cost: %f, Test Accuracy: %f%%" % (cost, acc / n * 100.0))
+    if flag_print:
+        print("Cost: %f, Test Accuracy: %f%%" % (cost, acc / n * 100.0))
     acc_test = acc / n * 100.0
-    
+    cost_test = cost
+
     end_time = time.time()
     test_time = end_time - start_time
 
-    return train_time, test_time, acc_train, acc_test
+    return train_time, test_time, acc_train, acc_test, cost_train, cost_test
 
 
 if __name__ == "__main__":
@@ -120,7 +131,38 @@ if __name__ == "__main__":
     x_test = test_set['x_test']
     y_test = test_set['y_test']   
 
-    T_train, T_test, acc_train, acc_test = train_n_test(x_train, y_train, x_test, y_test)
+    if args.find_best_alpha :
+        # Using Ternary Search
+        flag_print = False
+        head = 0
+        tail = 50.0
+        cnt = 0
+        best_alpha = 0.001
+
+        print('Finding Best Learning Rate...\n')
+        while tail - head > 1e-6:
+            p = (2 * head + tail) / 3
+            q = (head + 2 * tail) / 3
+
+            alpha = p
+            _, _, _, _, p_cost, _ = train_n_test(x_train, y_train, x_test, y_test)
+            alpha = q
+            _, _, _, _, q_cost, _ = train_n_test(x_train, y_train, x_test, y_test)
+
+            cnt += 1
+            print('%d Search: [%.6f, %.6f, %.6f, %.6f] => Cost_p: %.6f, Cost_q: %.6f' % (cnt, head, p, q, tail, p_cost, q_cost))
+            if p_cost > q_cost:
+                head = p
+                best_alpha = q
+            elif p_cost <= q_cost:
+                tail = q
+                best_alpha = p
+        
+        print('\nBest Learning Rate: %.6f' % best_alpha)
+        alpha = best_alpha
+        flag_print = True    
+    
+    T_train, T_test, acc_train, acc_test, cost_train, cost_test = train_n_test(x_train, y_train, x_test, y_test)
     print("\n\n")
     print("######## HYPER-PARAMETERS ########")
     print("num of train sample (m) : %d" % (m))
@@ -128,6 +170,8 @@ if __name__ == "__main__":
     print("num of iterations (k) : %d" % (iterations))
     print("\n######## TASK 1 RESULT ########")
     print("Training Time : %.6f" % (T_train))
-    print("Training Accuracy : %.6f" % (acc_train))
+    print("Training Accuracy : %f" % (acc_train))
+    print("Training Cost : %f" % (cost_train))
     print("Test Time : %.6f" % (T_test))
-    print("Test Accuracy : %.6f" % (acc_test))
+    print("Test Accuracy : %f" % (acc_test))
+    print("Test Cost : %f" % (cost_test))
