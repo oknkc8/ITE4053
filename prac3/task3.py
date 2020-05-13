@@ -153,7 +153,7 @@ if __name__ == "__main__":
         # Using Ternary Search
         flag_print = False
         head = 0
-        tail = 50.0
+        tail = 1.0
         cnt = 0
         best_alpha = 0.001
 
