@@ -46,7 +46,7 @@ def plot_img(epoch, status, img_output, img_GT):
 
 class DeNoise(Model):
 	def __init__(self):
-		super(DeNoise).__init__()
+		super(DeNoise, self).__init__()
 		self.conv1 = tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu')
 		self.conv2 = tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu')
 		self.conv3 = tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu')
@@ -129,14 +129,14 @@ if __name__ == "__main__":
 
 
 		if (epoch + 1) % args.log_step == 0:
-			# Evalution
+			# Evaluation
 			for idx, (test_img_input, test_img_GT) in enumerate(test_dataset):
 				test_img_output = model_1(test_img_input, training=True)
 				t_loss = loss(test_img_GT, test_img_output)
 
 				test_loss(t_loss)
 				if (epoch + 1) % args.log_step == 0 and idx == 0 and args.img_show:
-					plot_img(epoch, 'training', test_img_output[0], test_img_GT[0])
+					plot_img(epoch, 'Evaluation', test_img_output[0], test_img_GT[0])
 
 			print('Epoch: %d => train loss: %.6f, test loss: %.6f'
 					% (epoch+1, train_loss.result(), test_loss.result()))
